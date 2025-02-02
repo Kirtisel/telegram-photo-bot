@@ -61,8 +61,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void initPhotoList(){
-        String path = new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
-        File file = new File(path);
+        File file = new File(photoPath);
         if(file.listFiles() != null) {
             for (File f : file.listFiles())
                 if (f.isFile()) photoList.add(f);
