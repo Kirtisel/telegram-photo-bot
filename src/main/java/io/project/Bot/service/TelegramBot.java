@@ -141,13 +141,21 @@ public class TelegramBot extends TelegramLongPollingBot {
             for(File f : photoList){ // получаем список имен файлов в папке фото
                 names = names.concat(" " + f.getName());
             }
-            for (String key : captionMap.keySet()) {
-                if (!names.contains(key)) { //если в папке нет файла с имененм ключа,
-                    //значит фотка удалена и описание к ней можно удалить по ключу
-                    captionMap.remove(key);
+            System.out.println("names" + names);
+            System.out.println("captionMap.size() " + captionMap.size());
+
+            Iterator<Map.Entry<String, String>> iterator = captionMap.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, String> entry = iterator.next();
+                String key = entry.getKey();
+                if (!names.contains(key)) {
+                    // Удаляем элемент, если ключа нет в names
+                    iterator.remove();
                 }
             }
-            System.out.println("captionMap.size() " + captionMap.size());
+
+
+
         }
         else {
             captionMap = new HashMap<>();
@@ -172,32 +180,15 @@ public class TelegramBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
 
         if(update.hasMessage() && update.getMessage().hasPhoto()){
-            //List<PhotoSize> list = update.getMessage().getPhoto();
             String caption = update.getMessage().getCaption();
             pattern.matcher(caption);
 
             if (pattern.matches("/addphoto.*", caption)) {
-              //"/addphoto":
-
 
                     if(photoList.size() >= config.getMaxPhotoVal()){
                         if(photoList.get(0).delete()){
                             System.out.println("Файл удален");
                             photoList.remove(0);
-                            //initPhotoList();
-
-//                            for (int i =0; i < photoList.size(); i++){
-//                                String s = photoList.get(i).getName();
-//                                System.out.println(s);
-//                                String ms[] = s.split("\n");
-//
-//                                for (int k = 0; k < ms.length; k++)
-//                                    System.out.println(ms[k]);
-//
-//                                System.out.println(photoList.get(i).renameTo(new File((i+1) + "\n" + ms[1] + "\n" + ms[2])));
-//                                System.out.println("\n Переименовал в " + photoList.get(i).getName());
-//                                i++;
-//                            }
 
                         }else{
                             System.out.println("Файл НЕ удален");
