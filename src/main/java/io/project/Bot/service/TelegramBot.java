@@ -17,6 +17,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
@@ -28,9 +30,15 @@ public class TelegramBot extends TelegramLongPollingBot {
     private ArrayList<File> manList = new ArrayList<>();
     private ArrayList<File> photoList = new ArrayList<>();
     private HashMap<String, String> captionMap;
+    private String serMapName = "./serSrc/captionMap.ser";
+    private String photoPath;
+
+    private Pattern pattern = Pattern.compile("/addphoto.*");
+
 
     public TelegramBot(BotConfig config) {
         this.config = config;
+        photoPath = new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
         initGirlsList();
         initCaptionGirlList();
         initMansList();
@@ -127,8 +135,20 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void initCaptionMap(){
-        if (Files.exists(Paths.get("./serSrc/captionMap.ser"))){
+        if (Files.exists(Paths.get(serMapName))){
             //десереализовать мапу
+            captionMap = (HashMap<String, String>) deserializeObj(Paths.get(serMapName));
+            String names ="";
+            for(File f : photoList){ // получаем список имен файлов в папке фото
+                names = names.concat(" " + f.getName());
+            }
+            for (String key : captionMap.keySet()) {
+                if (!names.contains(key)) { //если в папке нет файла с имененм ключа,
+                    //значит фотка удалена и описание к ней можно удалить по ключу
+                    captionMap.remove(key);
+                }
+            }
+            System.out.println("captionMap.size() " + captionMap.size());
         }
         else {
             captionMap = new HashMap<>();
@@ -155,9 +175,11 @@ public class TelegramBot extends TelegramLongPollingBot {
         if(update.hasMessage() && update.getMessage().hasPhoto()){
             //List<PhotoSize> list = update.getMessage().getPhoto();
             String caption = update.getMessage().getCaption();
+            pattern.matcher(caption);
 
-            switch (caption) {
-                case "/addphoto":
+            if (pattern.matches("/addphoto.*", caption)) {
+              //"/addphoto":
+
 
                     if(photoList.size() >= config.getMaxPhotoVal()){
                         if(photoList.get(0).delete()){
@@ -192,20 +214,32 @@ public class TelegramBot extends TelegramLongPollingBot {
 
                     try {
                         org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-                        File jFile = new File(new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1)) + "/" + "\n"
-                                + update.getMessage().getChat().getUserName() + "\n" + java.time.LocalDate.now() +"\n" + java.time.LocalTime.now());
+                        String fileName = update.getMessage().getChat().getUserName() + "\n" + java.time.LocalDate.now()
+                                +"\n" + java.time.LocalTime.now();
+
+                        File jFile = new File(photoPath + "/" + fileName);
 
                         downloadFile(file, jFile);
                         System.out.println("скачал");
+                        System.out.println(jFile.getName());
+
+                        if (caption.length() > 10) { // если есть описание добавляем в хэшмэп
+                            String userCaption = caption.substring(10);
+                             captionMap.put(fileName, userCaption);
+                        }
+                        System.out.println(captionMap.get(jFile.getName()));
+
+                        serializeObj(captionMap,Paths.get(serMapName));
                         //photoList.add(jFile);
+
+
 
 
                     } catch (TelegramApiException e) {
                         throw new RuntimeException(e);
                     }
                     initPhotoList();
-                    break;
-                default:
+
 
             }
 
@@ -304,10 +338,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(String.valueOf(chatId));
         sendPhoto.setReplyToMessageId(messageId);
-        sendPhoto.setCaption(captionManList.get(rnd_caption));
+
         InputFile inputFile = new InputFile();
-        inputFile.setMedia(photoList.get(rnd_photo));
-        //inputFile.setMedia(new File("//home//user//Изображения//1695982838119955503.jpg"));
+        File photo = photoList.get(rnd_photo);
+        inputFile.setMedia(photo);
+
+        if (captionMap.get(photo.getName())!= null) // если пользователь добавлял описание оно должно быть в мапе
+            sendPhoto.setCaption(captionMap.get(photo.getName()));
+        else
+            sendPhoto.setCaption(captionManList.get(rnd_caption)); //если нет в мапе берем рандомное описание
+
         sendPhoto.setPhoto(inputFile);
         try{
             execute(sendPhoto);
@@ -332,6 +372,30 @@ public class TelegramBot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
 
         }
+    }
+
+    private void serializeObj(Object obj, Path p){
+        try {
+            FileOutputStream fos = new FileOutputStream(p.toString());
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+            oos.writeObject(obj);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private Object deserializeObj (Path p){
+        Object obj;
+        try {
+            FileInputStream fis = new FileInputStream(p.toString());
+            ObjectInputStream ois = new ObjectInputStream(fis);
+            obj = ois.readObject();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return obj;
     }
 
 
