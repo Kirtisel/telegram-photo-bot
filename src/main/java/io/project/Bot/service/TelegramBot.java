@@ -13,6 +13,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @Component
@@ -24,6 +27,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private List<File> girlList = new ArrayList<>();
     private ArrayList<File> manList = new ArrayList<>();
     private ArrayList<File> photoList = new ArrayList<>();
+    private HashMap<String, String> captionMap;
 
     public TelegramBot(BotConfig config) {
         this.config = config;
@@ -32,6 +36,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         initMansList();
         initCaptionManList();
         initPhotoList();
+        initCaptionMap();
 
     }
 
@@ -119,6 +124,15 @@ public class TelegramBot extends TelegramLongPollingBot {
 
         //System.out.println(captionList.get(4));
 
+    }
+
+    private void initCaptionMap(){
+        if (Files.exists(Paths.get("./serSrc/captionMap.ser"))){
+            //десереализовать мапу
+        }
+        else {
+            captionMap = new HashMap<>();
+        }
     }
 
 
