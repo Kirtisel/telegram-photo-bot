@@ -30,4 +30,9 @@ public class Photo implements Serializable {
     public String getCaption() {
         return caption;
     }
+
+    @Override
+    public String toString() {
+        return getUserSender() + " caption: \n" + getCaption();
+    }
 }

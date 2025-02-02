@@ -1,5 +1,6 @@
 package io.project.Bot.service;
 
+import com.google.common.io.Files;
 import io.project.Bot.config.BotConfig;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -50,9 +51,42 @@ public class TelegramBot extends TelegramLongPollingBot {
     private void initPhotoList(){
         String path = new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
         File file = new File(path);
+
         if(file.listFiles() != null) {
-            for (File f : file.listFiles())
-                if (f.isFile()) photoList.add(f);
+            File[] mFiles = file.listFiles();
+            Photo photo = new Photo(mFiles[0],"kirtisel");
+            serializePhoto(photo);
+            deSerializePhoto(new File("./serObj_Photo/" + "1" + ".ser"));
+//            for (File f : file.listFiles())
+//                if (f.isFile()) photoList.add(f);
+        }
+    }
+
+    private void serializePhoto(Photo photo){
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream("./serObj_Photo/" + "1" + ".ser"); //переделать название файла
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);
+            objectOutputStream.writeObject(photo);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void deSerializePhoto(File photo){
+        try {
+            FileInputStream fileInputStream = new FileInputStream(photo); //переделать название файла
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            Photo photo1 = (Photo) objectInputStream.readObject();
+            System.out.println(photo1.getUserSender());
+
+
+            photo1.getFile();
+            FileOutputStream fileOutputStream = new FileOutputStream("./serObj_Photo/" + "2" + ".ser");
+            ObjectOutputStream oos = new ObjectOutputStream(fileOutputStream);
+            oos.writeObject(photo1);
+            Files.write(photo1.getFile(),"./serObj_Photo/" + "1" + ".ser");
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
         }
     }
 
