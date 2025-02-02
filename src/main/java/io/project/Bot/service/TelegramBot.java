@@ -137,28 +137,29 @@ public class TelegramBot extends TelegramLongPollingBot {
         if (Files.exists(Paths.get(serMapName))){
             //десереализовать мапу
             captionMap = (HashMap<String, String>) deserializeObj(Paths.get(serMapName));
-            String names ="";
-            for(File f : photoList){ // получаем список имен файлов в папке фото
-                names = names.concat(" " + f.getName());
-            }
-            System.out.println("names" + names);
+            updateCaptionMap();
             System.out.println("captionMap.size() " + captionMap.size());
-
-            Iterator<Map.Entry<String, String>> iterator = captionMap.entrySet().iterator();
-            while (iterator.hasNext()) {
-                Map.Entry<String, String> entry = iterator.next();
-                String key = entry.getKey();
-                if (!names.contains(key)) {
-                    // Удаляем элемент, если ключа нет в names
-                    iterator.remove();
-                }
-            }
-
-
-
         }
         else {
             captionMap = new HashMap<>();
+        }
+    }
+
+    private void updateCaptionMap(){// создает стринг с именами фоток в папке, потом смотрит есть ли эти названия в ключах
+        String names ="";
+        for(File f : photoList){ // получаем список имен файлов в папке фото
+            names = names.concat(" " + f.getName());
+        }
+        System.out.println("names" + names);
+
+        Iterator<Map.Entry<String, String>> iterator = captionMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<String, String> entry = iterator.next();
+            String key = entry.getKey();
+            if (!names.contains(key)) {
+                // Удаляем элемент, если ключа нет в names
+                iterator.remove();
+            }
         }
     }
 
@@ -179,98 +180,93 @@ public class TelegramBot extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
 
-        if(update.hasMessage() && update.getMessage().hasPhoto()){
-            String caption = update.getMessage().getCaption();
+        if(update.hasMessage() ) {
+            if (update.getMessage().hasPhoto()){
+                String caption = update.getMessage().getCaption();
             pattern.matcher(caption);
 
             if (pattern.matches("/addphoto.*", caption)) {
 
-                    if(photoList.size() >= config.getMaxPhotoVal()){
-                        if(photoList.get(0).delete()){
-                            System.out.println("Файл удален");
-                            photoList.remove(0);
-
-                        }else{
-                            System.out.println("Файл НЕ удален");
-                        }
+                if (photoList.size() >= config.getMaxPhotoVal()) {
+                    if (photoList.get(0).delete()) {
+                        System.out.println("Файл удален");
                         photoList.remove(0);
+
+                    } else {
+                        System.out.println("Файл НЕ удален");
                     }
+                    photoList.remove(0);
+                }
 
-                    List<PhotoSize> list = update.getMessage().getPhoto();
-                    System.out.println("есть фото");
-                    System.out.println("размер = " + list.size());
+                List<PhotoSize> list = update.getMessage().getPhoto();
+                System.out.println("есть фото");
+                System.out.println("размер = " + list.size());
 
-                    GetFile getFile = new GetFile(list.get(3).getFileId());
+                GetFile getFile = new GetFile(list.get(3).getFileId());
 
-                    try {
-                        org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
-                        String fileName = update.getMessage().getChat().getUserName() + "\n" + java.time.LocalDate.now()
-                                +"\n" + java.time.LocalTime.now();
+                try {
+                    org.telegram.telegrambots.meta.api.objects.File file = execute(getFile);
+                    String fileName = update.getMessage().getChat().getUserName() + "\n" + java.time.LocalDate.now()
+                            + "\n" + java.time.LocalTime.now();
 
-                        File jFile = new File(photoPath + "/" + fileName);
+                    File jFile = new File(photoPath + "/" + fileName);
 
-                        downloadFile(file, jFile);
-                        System.out.println("скачал");
-                        System.out.println(jFile.getName());
+                    downloadFile(file, jFile);
+                    System.out.println("скачал");
+                    System.out.println(jFile.getName());
 
-                        if (caption.length() > 10) { // если есть описание добавляем в хэшмэп
-                            String userCaption = caption.substring(10);
-                             captionMap.put(fileName, userCaption);
-                        }
-                        System.out.println(captionMap.get(jFile.getName()));
-
-                        serializeObj(captionMap,Paths.get(serMapName));
-                        //photoList.add(jFile);
-
-
-
-
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
+                    if (caption.length() > 10) { // если есть описание добавляем в хэшмэп
+                        String userCaption = caption.substring(10);
+                        captionMap.put(fileName, userCaption);
                     }
-                    initPhotoList();
+                    System.out.println(captionMap.get(jFile.getName()));
+
+                    serializeObj(captionMap, Paths.get(serMapName));
+                    //photoList.add(jFile);
+
+
+                } catch (TelegramApiException e) {
+                    throw new RuntimeException(e);
+                }
+                initPhotoList();
 
 
             }
 
+        } else if (update.getMessage().hasText()) {
+                String messageText = update.getMessage().getText();
+                long chatId = update.getMessage().getChatId();
+                int messageId = update.getMessage().getMessageId();
 
-        }
-
-        if(update.hasMessage() && update.getMessage().hasText()){
-
-
-
-            String messageText = update.getMessage().getText();
-            long chatId = update.getMessage().getChatId();
-            int messageId = update.getMessage().getMessageId();
-
-            switch (messageText){
-                case "/help":
-                    startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/start":
-                    startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
-                   break;
-                case "/":
-                    startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
-                    break;
-                case "/woman":
-                    girlCommandRecieved(chatId, messageId);
-                    break;
-                case "/man":
-                    manCommandRecieved(chatId, messageId);
-                    break;
-                case "/photo":
-                    photoCommandRecieved(chatId,messageId);
-                    break;
-                default:
-                    //sendMessage(chatId, "Sorry, command was not recognized");
+                switch (messageText){
+                    case "/help":
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
+                    case "/start":
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
+                    case "/":
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
+                    case "/woman":
+                        girlCommandRecieved(chatId, messageId);
+                        break;
+                    case "/man":
+                        manCommandRecieved(chatId, messageId);
+                        break;
+                    case "/photo":
+                        photoCommandRecieved(chatId,messageId);
+                        break;
+                    default:
+                        //sendMessage(chatId, "Sorry, command was not recognized");
+                }
             }
-
-
         }
 
     }
+
+
+
     private void startCommandRecieved(long chatId, String name){
         String answer = "Привет "+ name + ", мои комманды: " +
                 "\n\n /photo получить случайное фото с катки" +
