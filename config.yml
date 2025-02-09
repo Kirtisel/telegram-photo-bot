@@ -1,0 +1,36 @@
+bot:
+  name: chillThursday_bot
+  token: 7482119035:AAHpPsDzamIVmo2TGaK86XHGcbtkG7D4yB0
+
+girls:
+  path: ./Девушки
+
+man:
+  path: ./Парни
+
+photo:
+  path: ./Разные фото
+
+captionGirl:
+  path: ./описание девушки
+
+captionMan:
+  path: ./описание парни
+
+max:
+  photo:
+    value: 40
+
+hehe: Работает с русскими символами
+
+webhook:
+  url: https://4062076615e30f8dcce09106170e712b.serveo.net
+
+server:
+  port: 8443 # Порт для HTTPS
+  ssl:
+    enabled: true
+    key-store: file:./PUBLIC.pem
+    #key-store-password: qwerty
+    key-store-type: pem
+    protocol: TLS

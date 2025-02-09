@@ -48,6 +48,8 @@ public class TelegramBot extends TelegramWebhookBot {
         initPhotoList();
         initCaptionMap();
 
+        System.out.println("Бот успешно зарегистрирован. Вебхук установлен на: {}" + config.getUrl());
+
     }
 
     private void initGirlsList(){
@@ -222,7 +224,7 @@ public class TelegramBot extends TelegramWebhookBot {
         int rnd_caption = random(0, captionGirlList.size()-1);
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(String.valueOf(chatId));
-        sendPhoto.setReplyToMessageId(messageId);
+        sendPhoto.setReplyToMessageId(Integer.valueOf(messageId));
         sendPhoto.setCaption(captionGirlList.get(rnd_caption));
         InputFile inputFile = new InputFile();
         inputFile.setMedia(girlList.get(rnd_girl));
@@ -311,7 +313,7 @@ private int random(int min, int max){
 
     @Override
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-
+        System.out.println("BIIIIIIItch");
         if(update.hasMessage() ) {
             if (update.getMessage().hasPhoto()){
                 String caption = update.getMessage().getCaption();
@@ -398,6 +400,6 @@ private int random(int min, int max){
 
     @Override
     public String getBotPath() {
-        return "";
+        return config.getUrl();
     }
 }

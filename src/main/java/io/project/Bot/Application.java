@@ -1,8 +1,11 @@
 package io.project.Bot;
 
+import io.project.Bot.config.BotConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.stereotype.Component;
+
+import io.project.Bot.config.BotConfig;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
+		//System.out.println(new BotConfig().getCaptionManPath());
 		//initCaptionList();
 	}
 

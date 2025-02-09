@@ -10,21 +10,30 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 
+import io.project.Bot.config.BotConfig;
+
 @Component
 public class BotInitializer {
     @Autowired
     TelegramBot bot;
+    @Autowired
+    BotConfig config;
 
     @EventListener({ContextRefreshedEvent.class})
     public void init() throws TelegramApiException{
+        try{
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
         SetWebhook setWebhook = new SetWebhook();
-        setWebhook.setUrl(""); // записать url
-        try{
-            telegramBotsApi.registerBot(bot, new SetWebhook());
-        }
-        catch (TelegramApiException e){
+        System.out.println("url  " + config.getPhotoPath());
+        setWebhook.setUrl(config.getUrl()); // записать url
 
+            telegramBotsApi.registerBot(bot, setWebhook);
+
+            System.out.println("Бот успешно зарегистрирован. Вебхук установлен на: {}" + config.getUrl());
+        }
+
+        catch (TelegramApiException e){
+            System.out.println("ошибка");
         }
     }
 }

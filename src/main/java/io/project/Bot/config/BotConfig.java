@@ -11,7 +11,8 @@ import java.nio.charset.StandardCharsets;
 
 @Configuration
 @Data
-@PropertySource("file:./config")
+@PropertySource(value = "file:./config.yml", factory = YamlPropertySourceFactory.class)
+//чтобы в аннотацию записать Yml потребовался класс YamlPropSource
 public class BotConfig {
     //PropertySourcesPlaceholderConfigurer p = propertySourcesPlaceholderConfigurer();
     @Value("${bot.name}")
@@ -30,6 +31,8 @@ public class BotConfig {
     String photoPath;
     @Value("${max.photo.value}")
     int maxPhotoVal;
+    @Value("${webhook.url}")
+    String url;
 
 //    public void init (){
 //        photoPath = new String(getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
