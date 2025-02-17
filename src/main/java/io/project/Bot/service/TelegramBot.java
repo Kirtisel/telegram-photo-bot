@@ -40,7 +40,9 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     public TelegramBot(BotConfig config) {
         this.config = config;
-        photoPath = new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
+        this.photoPath = config.getPhotoPath();
+        //this.photoPath = new String(config.getPhotoPath().getBytes(StandardCharsets.ISO_8859_1));
+
         initGirlsList();
         initCaptionGirlList();
         initMansList();
@@ -65,6 +67,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void initPhotoList(){
+        System.out.println("путь до папки фото " + photoPath);
+        System.out.println(Paths.get(photoPath));
+
         File file = new File(photoPath);
         if(file.listFiles() != null) {
             for (File f : file.listFiles())
@@ -185,14 +190,14 @@ public class TelegramBot extends TelegramLongPollingBot {
 
 
 
-    private SendMessage startCommandRecieved(long chatId, String name){
+    private void startCommandRecieved(long chatId, String name){
         String answer = "Привет "+ name + ", мои комманды: " +
                 "\n\n /photo получить случайное фото с катки" +
                 //"\n\n /woman /man получить случайное фото велосипедиста" +
                 "\n\n а если отправишь фотку с подписью /addphoto твое фото добавиться в бот и сможет быть вызвано коммандой /photo";
 
 
-        return sendMessage(chatId, answer);
+         sendMessage(chatId, answer);
     }
 
     private void girlCommandRecieved(long chatId,int messageId){
@@ -207,16 +212,16 @@ public class TelegramBot extends TelegramLongPollingBot {
         sendManImage(chatId, messageId);
     }
 
-    private SendMessage sendMessage(long chatId, String textToSend){
+    private void sendMessage(long chatId, String textToSend){
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
-//        try{
-//            execute(message);
-//        } catch (TelegramApiException e) {
-//
-//        }
-        return message;
+        try{
+            execute(message);
+        } catch (TelegramApiException e) {
+
+        }
+ //       return message;
     }
 
     private void sendGirlImage(long chatId, int messageId){
@@ -238,7 +243,9 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void sendPhoto(long chatId, int messageId){
+        System.out.println(photoList.size() + "размер листа фото");
         int rnd_photo = random(0, photoList.size()-1);
+
         int rnd_caption = random(0, captionManList.size()-1);
         SendPhoto sendPhoto = new SendPhoto();
         sendPhoto.setChatId(String.valueOf(chatId));
