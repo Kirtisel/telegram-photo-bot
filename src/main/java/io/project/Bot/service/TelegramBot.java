@@ -23,7 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class TelegramBot extends TelegramWebhookBot {
+public class TelegramBot extends TelegramLongPollingBot {
 
     final BotConfig config;
     private ArrayList<String> captionGirlList = new ArrayList<>();
@@ -311,9 +311,9 @@ private int random(int min, int max){
     return randomNum;
 }
 
+
     @Override
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        System.out.println("BIIIIIIItch");
+    public void onUpdateReceived(Update update) {
         if(update.hasMessage() ) {
             if (update.getMessage().hasPhoto()){
                 String caption = update.getMessage().getCaption();
@@ -374,11 +374,14 @@ private int random(int min, int max){
 
                 switch (messageText){
                     case "/help":
-                        return startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
                     case "/start":
-                        return startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
                     case "/":
-                        return startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        startCommandRecieved(chatId, update.getMessage().getChat().getFirstName());
+                        break;
                     case "/woman":
                         girlCommandRecieved(chatId, messageId);
                         break;
@@ -393,13 +396,5 @@ private int random(int min, int max){
                 }
             }
         }
-
-
-        return null;
-    }
-
-    @Override
-    public String getBotPath() {
-        return config.getUrl();
     }
 }

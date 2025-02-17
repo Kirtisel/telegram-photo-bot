@@ -23,11 +23,11 @@ public class BotInitializer {
     public void init() throws TelegramApiException{
         try{
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-        SetWebhook setWebhook = new SetWebhook();
-        System.out.println("url  " + config.getPhotoPath());
-        setWebhook.setUrl(config.getUrl()); // записать url
+       // SetWebhook setWebhook = new SetWebhook();
+       // System.out.println("url  " + config.getPhotoPath());
+       // setWebhook.setUrl(config.getUrl()); // записать url
 
-            telegramBotsApi.registerBot(bot, setWebhook);
+            telegramBotsApi.registerBot(bot);
 
             System.out.println("Бот успешно зарегистрирован. Вебхук установлен на: {}" + config.getUrl());
         }
