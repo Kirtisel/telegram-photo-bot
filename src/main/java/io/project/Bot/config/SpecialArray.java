@@ -1,18 +1,15 @@
 package io.project.Bot.config;
 
 
+import java.util.Map;
+import java.util.Random;
+
 public class SpecialArray {
     private int length;
     private int height;
     private Object[][] objArray;
-    public Object[] types;
+    private Object[] types;
     private int iter;
-//    A[] A;
-//    B[] B;
-//    C[] C;
-
-
-
 
     private SpecialArray(int height, Object[] types) {
         this.length = types.length;
@@ -28,23 +25,30 @@ public class SpecialArray {
     }
 
     public static void main(String[] args) {
-        SpecialArray array = SpecialArray.createSpecialArray(3, String.class, Integer.class, String.class);
-        array.add("a", 1, "");
-        array.add("b", 2, "");
-        array.add("c", 3, "");
+        SpecialArray array = SpecialArray.createSpecialArray(50, String.class, Integer.class, String.class);
+
+        for (int i = 0; i < 50; i++)
+        array.add("a", i, "");
+
         //System.out.println(array.types[0]);
         //System.out.println(array.types[0].getClass());
         //System.out.println("a".getClass());
-        System.out.println(array.get(0)[0]);
-        System.out.println(array.get(1)[0]);
-        System.out.println(array.get(2)[0]);
-    }
+        for (int i = 0; i < 50; i++)
+        System.out.println(array.get(i)[1]);
 
-//    private void deleteFirstElement(){
-//        for(int i = 0; i < length; i++){
-//            objArray[0][i] = null;
-//        }
-//    }
+        System.out.println();
+        array.add("b",1, "");
+        System.out.println(array.get(49)[0]);
+
+        System.out.println();
+        for (int i = 0; i < 50; i++)
+            System.out.println(array.get(i)[1]);
+
+        System.out.println();
+        System.out.println("random = ");
+            System.out.println(array.getRandom()[1]);
+
+    }
 
     private void moveDown(){
         for(int i = 1; i < height; i++){
@@ -84,6 +88,12 @@ public class SpecialArray {
      }
 
      return arr;
+    }
+
+    public Object[] getRandom(){
+        Random rn = new Random();
+        int randomNum = rn.nextInt(height);
+        return get(randomNum);// get(randomNum);
     }
 
 }
