@@ -1,4 +1,4 @@
-package io.project.Bot.config;
+package io.project.Bot.service;
 
 import java.util.ArrayList;
 import java.util.Map;

@@ -1,7 +1,5 @@
-package io.project.Bot.config;
+package io.project.Bot.service;
 
-
-import java.util.Map;
 import java.util.Random;
 
 public class SpecialArray {
